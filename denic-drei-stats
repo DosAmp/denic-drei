@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: FSFAP
+
+import os.path, sys, locale, sqlite3, operator
+
+dbfile = os.path.join(os.path.dirname(__file__), "denic-drei.db")
+if not os.path.isfile(dbfile):
+    print("Database file not found. Did you run make?", file=sys.stderr)
+    sys.exit(1)
+locale.setlocale(locale.LC_NUMERIC, "")
+
+with sqlite3.connect(dbfile) as db:
+    cur = db.cursor()
+    cur.execute("SELECT COUNT(*) FROM excluded")
+    (exclude_count,) = cur.fetchone()
+    all_count = 2 * 36**3 - exclude_count
+    cur.execute("SELECT status_code, COUNT(status_code) FROM results GROUP BY status_code ORDER BY status_code")
+    results = cur.fetchall()
+    result_str = ", ".join(map(lambda i: "{} {}er".format(i[1], i[0]), results))
+    percentage = 100.0 * sum(map(operator.itemgetter(1), results)) / all_count
+    print("Ergebnisse:", result_str, locale.format_string("(%.2f%% fertig)", percentage))

@@ -1,0 +1,10 @@
+[Unit]
+Description=DENIC-Drei Scraper
+After=network-online.target
+
+[Service]
+ExecStart=PLACEHOLDER_PATH/denic-drei
+User=PLACEHOLDER_USER
+
+[Install]
+WantedBy=multi-user.target

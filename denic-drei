@@ -1,0 +1,49 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: FSFAP
+
+import requests, requests.exceptions
+import string, itertools, operator, random, time, calendar, email.utils, sqlite3, os.path, traceback, sys
+
+def random_sleep(factor=1):
+    global settings
+    time.sleep(factor * random.normalvariate(settings["wait_mean"], factor * settings["wait_stddev"]))
+
+def remaining_domains(cur):
+    cur.execute("SELECT domain_name FROM excluded UNION SELECT domain_name FROM results")
+    exclude_set = set(map(operator.itemgetter(0), cur.fetchall()))
+    alphabet = string.digits + string.ascii_lowercase
+    all_combinations = itertools.product(alphabet, alphabet, alphabet)
+    filtered_combinations = filter(lambda s: s not in exclude_set, map(lambda t: "".join(t) + ".de", all_combinations))
+    domain_list = list(filtered_combinations)
+    random.shuffle(domain_list)
+    return iter(domain_list)
+
+dbfile = os.path.join(os.path.dirname(__file__), "denic-drei.db")
+if not os.path.isfile(dbfile):
+    print("Database file not found. Did you run make?", file=sys.stderr)
+    sys.exit(1)
+settings = dict()
+
+with sqlite3.connect(dbfile) as db, requests.Session() as sess:
+    sess.headers["User-Agent"] = "DENIC-Drei/0.333 (" + sess.headers["User-Agent"] + ")"
+    cur = db.cursor()
+    cur.execute("SELECT wait_mean, wait_stddev FROM settings")
+    settings["wait_mean"], settings["wait_stddev"] = cur.fetchone()
+    for domain in remaining_domains(cur):
+        request_url = "https://rdap.denic.de/domain/" + domain
+        while True:
+            try:
+                resp = sess.head(request_url)
+                break
+            except requests.exceptions.RequestException:
+                traceback.print_exc()
+                random_sleep(10)
+        status_code = resp.status_code
+        request_timestamp = calendar.timegm(email.utils.parsedate(resp.headers['Date']))
+        cur.execute("INSERT INTO results (domain_name, status_code, timestamp) VALUES (?, ?, ?)",
+                    (domain, status_code, request_timestamp))
+        db.commit()
+        if status_code >= 400 and status_code != 404:
+            print("I can't handle HTTP error code", status_code, file=sys.stderr)
+            sys.exit(1)
+        random_sleep()

@@ -1,0 +1,6 @@
+*~
+# direct testing of scripts without make
+denic-drei.db
+.directory
+excludes
+inst/
