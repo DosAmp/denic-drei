@@ -36,8 +36,8 @@ install-scripts:
 
 install: all
 	install -m 644 "$(INST_SERVICE)" "$(SYSTEMD_UNIT_DIR)"
-	if [ "$$(ps --no-headers -p 1 -o comm)" = systemd ]; then systemctl --system daemon-reload; fi
+	if [ "$$(ps -p 1 -o comm=)" = systemd ]; then systemctl --system daemon-reload; fi
 
 uninstall: clean
 	rm -f "$(SYSTEMD_UNIT_DIR)/denic-drei.service"
-	if [ "$$(ps --no-headers -p 1 -o comm)" = systemd ]; then systemctl --system daemon-reload; fi	
+	if [ "$$(ps -p 1 -o comm=)" = systemd ]; then systemctl --system daemon-reload; fi	
