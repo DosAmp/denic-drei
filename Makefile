@@ -25,7 +25,7 @@ $(INST_DB): denic-drei.sql
 
 $(INST_SERVICE): denic-drei.service
 	@mkdir -p $(INST_DIR)
-	sed "s:PLACEHOLDER_PATH:`realpath "$(INST_DIR)"`:;s:PLACEHOLDER_USER:`stat -c %U "$(INST_DB)"`:" $< > "$@"
+	sed "s:PLACEHOLDER_PATH:$$(realpath "$(INST_DIR)"):;s:PLACEHOLDER_USER:$$(stat -c %U "$(INST_DB)"):" $< > "$@"
 
 clean:
 	rm -rf "$(INST_DIR)"
@@ -35,8 +35,8 @@ install-scripts:
 
 install: all
 	install -m 644 "$(INST_SERVICE)" "$(SYSTEMD_UNIT_DIR)"
-	if [ "`ps --no-headers -p 1 -o comm`" = systemd ]; then systemctl --system daemon-reload; fi
+	if [ "$$(ps --no-headers -p 1 -o comm)" = systemd ]; then systemctl --system daemon-reload; fi
 
 uninstall: clean
 	rm -f "$(SYSTEMD_UNIT_DIR)/denic-drei.service"
-	if [ "`ps --no-headers -p 1 -o comm`" = systemd ]; then systemctl --system daemon-reload; fi	
+	if [ "$$(ps --no-headers -p 1 -o comm)" = systemd ]; then systemctl --system daemon-reload; fi	
