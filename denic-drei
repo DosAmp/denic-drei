@@ -25,7 +25,7 @@ if not os.path.isfile(dbfile):
 settings = dict()
 
 with sqlite3.connect(dbfile) as db, requests.Session() as sess:
-    sess.headers["User-Agent"] = "DENIC-Drei/0.333 (" + sess.headers["User-Agent"] + ")"
+    sess.headers["User-Agent"] = "DENIC-Drei/GITVERSION (" + sess.headers["User-Agent"] + ")"
     cur = db.cursor()
     cur.execute("SELECT wait_mean, wait_stddev FROM settings")
     settings["wait_mean"], settings["wait_stddev"] = cur.fetchone()

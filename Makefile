@@ -32,6 +32,7 @@ clean:
 
 install-scripts:
 	install denic-drei denic-drei-stats "$(INST_DIR)"
+	gitver="$$(git describe --all --long 2>/dev/null || echo git)" && sed -i "/GITVERSION/s:GITVERSION:$${gitver##*-}:g" "$(INST_DIR)/denic-drei"
 
 install: all
 	install -m 644 "$(INST_SERVICE)" "$(SYSTEMD_UNIT_DIR)"
