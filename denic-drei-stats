@@ -3,7 +3,7 @@
 
 import os.path, sys, locale, sqlite3, operator
 
-dbfile = os.path.join(os.path.dirname(__file__), "denic-drei.db")
+dbfile = os.path.join(os.path.dirname(os.path.realpath(__file__)), "denic-drei.db")
 if not os.path.isfile(dbfile):
     print("Database file not found. Did you run make?", file=sys.stderr)
     sys.exit(1)
