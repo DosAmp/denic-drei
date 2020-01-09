@@ -6,7 +6,9 @@ import string, itertools, operator, random, time, calendar, email.utils, sqlite3
 
 def random_sleep(factor=1):
     global settings
-    time.sleep(factor * random.normalvariate(settings["wait_mean"], factor * settings["wait_stddev"]))
+    sleep_time = factor * random.normalvariate(settings["wait_mean"], settings["wait_stddev"])
+    if sleep_time > 0:
+        time.sleep(sleep_time)
 
 def remaining_domains(cur):
     cur.execute("SELECT domain_name FROM excluded UNION SELECT domain_name FROM results")
